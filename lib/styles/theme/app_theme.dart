@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const Color primaryColor = Color(0xFF6D8F71); // Verde grisáceo
-  static const Color secondaryColor = Color(0xFF1F3A60); // Azul oscuro
-  static const Color backgroundColor = Color(0xFFDFDFDF); // Gris claro
-  static const Color lightBackgroundColor = Color(0xFFF0F4F8); // Gris muy claro
-  static const Color accentColor = Color(0xFFF4A259); // Naranja
-  static const Color errorColor = Color(0xFFC0392B); // Rojo
+  static const Color rosePrimary = Color(0xFFBB5E7D); // Rosa
+  static const Color deepMaroon = Color(0xFF4B0019); // Marrón oscuro
+  static const Color softPinkBackground =
+      Color(0xFFE196AF); // Fondo suave rosado
+  static const Color palePinkBackground =
+      Color(0xFFFBE8EE); // Fondo rosa muy claro
+  static const Color deepRedAccent = Color(0xFF701332); // Rojo acentuado
+  static const Color errorColor = Color(0xFF4B0019); // Rojo para errores
+  static const Color lightGray = Color(0xFFF0F4F8); // Blanco grisáceo
 }
