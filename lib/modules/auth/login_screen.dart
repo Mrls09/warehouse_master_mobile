@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 color: AppColors.deepRedAccent,
                               ),
                             ),
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 16),
                             const Text(
                               'Ingrese su correo y contraseña para comenzar!',
                               textAlign: TextAlign.center,
@@ -68,19 +68,23 @@ class _LoginScreenState extends State<LoginScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 20), 
+                            const SizedBox(height: 28), 
                             TextFieldEmail(
                               controller: _username,
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 20),
                             TextFieldPassword(
                               controller: _password,
                             ),
                             const SizedBox(height: 16),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                const Text('¿Has olvidado tu contraseña?'),
+                                const Text('¿Has olvidado tu contraseña?',
+                                  style: TextStyle(
+                                      color: AppColors.deepMaroon,
+                                    ),
+                                ),
                                 TextButton(
                                   onPressed: () {
                                     print('Recuperar contraseña');
@@ -88,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   child: const Text(
                                     'Recuperar!',
                                     style: TextStyle(
-                                      color: AppColors.deepMaroon,
+                                      color: AppColors.rosePrimary,
                                     ),
                                   ),
                                 ),
@@ -114,6 +118,28 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 child: const Text('Iniciar Sesión'),
                               ),
+                            ),                            
+                            const SizedBox(height: 116),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                const Text('¿Aun no cuentas con una cuenta?',
+                                   style: TextStyle(
+                                      color: AppColors.deepMaroon,
+                                    ),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    print('Crear');
+                                  },
+                                  child: const Text(
+                                    'Crear!',
+                                    style: TextStyle(
+                                      color: AppColors.rosePrimary,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
