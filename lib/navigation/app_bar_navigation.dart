@@ -16,10 +16,10 @@ class _AppBarNavigationState extends State<AppBarNavigation> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    HomeScreen(),
-    EntryScreen(),
-    OutputScreen(),
-    ProfileScreen(),
+    const HomeScreen(),
+    const EntryScreen(),
+    const OutputScreen(),
+    const ProfileScreen(),
 
   ];
 
@@ -40,23 +40,25 @@ class _AppBarNavigationState extends State<AppBarNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     
       body: _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
+        items: [
+          const BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Inicio',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.input),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.login),
             label: 'Entradas',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.output),
+            icon: Transform.rotate(
+              angle: 3.1416, // Rotación de 180 grados en radianes
+              child: const Icon(Icons.logout),
+            ),
             label: 'Salidas',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Perfil',
           ),
