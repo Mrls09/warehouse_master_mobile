@@ -107,6 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   if (_formKey.currentState?.validate() ?? false) {
                                     print('Email: ${_username.text}');
                                     print('Password: ${_password.text}');
+                                    Navigator.pushNamed(context, '/app');
                                   }
                                 },
                                 style: OutlinedButton.styleFrom(
