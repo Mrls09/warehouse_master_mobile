@@ -30,12 +30,12 @@ class WarehouseModel extends Warehouse {
 
   Map<String, dynamic> toJson() {
     return {
-      'uid': _uid,
-      'name': _name,
-      'location': _location,
-      'capacity': _capacity,
-      'active': _active,
-      'lastModified': _lastModified,
+      'uid': uid,
+      'name': name,
+      'location': location,
+      'capacity': capacity,
+      'active': active,
+      'lastModified': lastModified,
     };
   }
 }
