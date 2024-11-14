@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:warehouse_master_mobile/modules/auth/login_screen.dart';
 import 'package:warehouse_master_mobile/modules/entry/screens/entry_screen.dart';
+import 'package:warehouse_master_mobile/modules/home/screens/create_user.dart';
 import 'package:warehouse_master_mobile/modules/home/screens/home_screen.dart';
 import 'package:warehouse_master_mobile/modules/output/screens/output_screen.dart';
 import 'package:warehouse_master_mobile/modules/profile/screens/profile_screen.dart';
@@ -17,18 +18,17 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const SplashScreen(),
-        '/login': (context) => const  LoginScreen(),
-        '/app': (context) => const AppBarNavigation(),
-        '/home': (context) => const HomeScreen(),
-        '/output': (context) => const OutputScreen(),
-        '/entry': (context) => const EntryScreen(),
-        '/profile': (context) => const ProfileScreen(),
-
-      }
-    );
+        debugShowCheckedModeBanner: false,
+        initialRoute: '/',
+        routes: {
+          '/': (context) => const SplashScreen(),
+          '/login': (context) => const LoginScreen(),
+          '/app': (context) => const AppBarNavigation(),
+          '/home': (context) => const HomeScreen(),
+          '/output': (context) => const OutputScreen(),
+          '/entry': (context) => const EntryScreen(),
+          '/profile': (context) => const ProfileScreen(),
+          '/user': (context) => CreateUserScreen(),
+        });
   }
 }

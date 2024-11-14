@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:warehouse_master_mobile/kernel/widgets/custom_dialog.dart';
 import 'package:warehouse_master_mobile/kernel/widgets/form/text_form_field_email.dart';
 import 'package:warehouse_master_mobile/kernel/widgets/form/text_form_field_password.dart';
 import 'package:warehouse_master_mobile/styles/theme/app_theme.dart';
@@ -15,6 +16,32 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _username = TextEditingController();
   final TextEditingController _password = TextEditingController();
   final _formKey = GlobalKey<FormState>(); // Clave del formulario
+
+  Future<void> _signIn() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      print('Email: ${_username.text}');
+      print('Password: ${_password.text}');
+      //Navigator.pushNamed(context, '/app');
+
+      await showDialog(
+        context: context,
+        barrierDismissible: false, // Evitar cerrar tocando fuera
+        builder: (BuildContext context) {
+          return CustomDialog(
+            title: 'Éxito',
+            message: '¡Bienvenido al Sistema!',
+            icon: Icons.check_circle_outline,
+            iconColor: Colors.green,
+            buttonText: 'Entrar al Sistema',
+            //buttonColor: Colors.green,
+            onConfirmed: () {
+              Navigator.pushNamed(context, '/app');
+            },
+          );
+        },
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,10 +72,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Padding(
                         padding: const EdgeInsets.all(24.0),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center, 
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Image.asset('assets/logo.png', width: 150, height: 150),
+                            Image.asset('assets/logo.png',
+                                width: 150, height: 150),
                             const Text(
                               '¡Bienvenido a WAREHOUSE!',
                               textAlign: TextAlign.center,
@@ -68,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 28), 
+                            const SizedBox(height: 28),
                             TextFieldEmail(
                               controller: _username,
                             ),
@@ -80,10 +108,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                const Text('¿Has olvidado tu contraseña?',
+                                const Text(
+                                  '¿Has olvidado tu contraseña?',
                                   style: TextStyle(
-                                      color: AppColors.deepMaroon,
-                                    ),
+                                    color: AppColors.deepMaroon,
+                                  ),
                                 ),
                                 TextButton(
                                   onPressed: () {
@@ -103,13 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               width: double.infinity,
                               height: 48,
                               child: ElevatedButton(
-                                onPressed: () {
-                                  if (_formKey.currentState?.validate() ?? false) {
-                                    print('Email: ${_username.text}');
-                                    print('Password: ${_password.text}');
-                                    Navigator.pushNamed(context, '/app');
-                                  }
-                                },
+                                onPressed: _signIn,
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: AppColors.palePinkBackground,
                                   backgroundColor: AppColors.rosePrimary,
@@ -119,15 +142,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 child: const Text('Iniciar Sesión'),
                               ),
-                            ),                            
+                            ),
                             const SizedBox(height: 116),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                const Text('¿Aun no cuentas con una cuenta?',
-                                   style: TextStyle(
-                                      color: AppColors.deepMaroon,
-                                    ),
+                                const Text(
+                                  '¿Aun no cuentas con una cuenta?',
+                                  style: TextStyle(
+                                    color: AppColors.deepMaroon,
+                                  ),
                                 ),
                                 TextButton(
                                   onPressed: () {
