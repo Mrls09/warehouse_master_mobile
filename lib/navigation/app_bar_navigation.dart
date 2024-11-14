@@ -3,6 +3,7 @@ import 'package:warehouse_master_mobile/modules/entry/screens/entry_screen.dart'
 import 'package:warehouse_master_mobile/modules/home/screens/home_screen.dart';
 import 'package:warehouse_master_mobile/modules/output/screens/output_screen.dart';
 import 'package:warehouse_master_mobile/modules/profile/screens/profile_screen.dart';
+import 'package:warehouse_master_mobile/modules/user/user_screen.dart';
 import 'package:warehouse_master_mobile/styles/theme/app_theme.dart';
 
 class AppBarNavigation extends StatefulWidget {
@@ -16,7 +17,7 @@ class _AppBarNavigationState extends State<AppBarNavigation> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    const HomeScreen(),
+    const UserScreen(),
     const EntryScreen(),
     const OutputScreen(),
     const ProfileScreen(),
