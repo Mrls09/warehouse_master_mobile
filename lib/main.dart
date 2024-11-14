@@ -5,6 +5,7 @@ import 'package:warehouse_master_mobile/modules/home/screens/create_user.dart';
 import 'package:warehouse_master_mobile/modules/home/screens/home_screen.dart';
 import 'package:warehouse_master_mobile/modules/output/screens/output_screen.dart';
 import 'package:warehouse_master_mobile/modules/profile/screens/profile_screen.dart';
+import 'package:warehouse_master_mobile/modules/user/user_screen.dart';
 import 'package:warehouse_master_mobile/navigation/app_bar_navigation.dart';
 import 'package:warehouse_master_mobile/widgets/splash_screen.dart';
 
@@ -29,6 +30,7 @@ class MainApp extends StatelessWidget {
           '/entry': (context) => const EntryScreen(),
           '/profile': (context) => const ProfileScreen(),
           '/created': (context) => const Placeholder(),
+          '/users': (context) => const UserScreen(),
           '/user': (context) => CreateUserScreen(),
         });
   }
