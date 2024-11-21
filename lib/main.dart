@@ -26,7 +26,7 @@ class MainApp extends StatelessWidget {
         '/home': (context) => const HomeScreen(),
         '/output': (context) => const OutputScreen(),
         '/entry': (context) => const EntryScreen(),
-        '/profile': (context) => const ProfileScreen(),
+        '/nav': (context) => const AppBarNavigation(),
 
       }
     );
