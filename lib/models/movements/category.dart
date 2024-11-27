@@ -1,26 +1,23 @@
-class Warehouse {
+class Category {
   final String uid;
   final String name;
-  final String location;
-  final int capacity;
+  final String description;
   final bool active;
   final String lastModified;
 
-  Warehouse({
+  Category({
     required this.uid,
     required this.name,
-    required this.location,
-    required this.capacity,
+    required this.description,
     required this.active,
     required this.lastModified,
   });
 
-  factory Warehouse.fromJson(Map<String, dynamic> json) {
-    return Warehouse(
+  factory Category.fromJson(Map<String, dynamic> json) {
+    return Category(
       uid: json['uid'],
       name: json['name'],
-      location: json['location'],
-      capacity: json['capacity'],
+      description: json['description'],
       active: json['active'],
       lastModified: json['lastModified'],
     );

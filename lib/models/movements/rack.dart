@@ -1,4 +1,4 @@
-import 'package:warehouse_master_mobile/models/warehouse.dart';
+import 'package:warehouse_master_mobile/models/movements/warehouse.dart';
 
 class Rack {
   final String uid;
