@@ -17,14 +17,14 @@ class _EntryScreenState extends State<EntryScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchTransfers();  // Llamada a la API
+    _fetchTransfers();
   }
 
   // Método para realizar la solicitud HTTP a la API
   Future<void> _fetchTransfers() async {
     try {
       Dio dio = Dio();
-      final response = await dio.get('http://localhost:8080/warehouse-master-api/movements/');
+      final response = await dio.get('http://129.213.69.201:8080/warehouse-master-api/movements/');
       
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'];
