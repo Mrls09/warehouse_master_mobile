@@ -1,8 +1,9 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
 
 class DioClient {
   final Dio _dio;
-
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   DioClient({required String baseUrl})
       : _dio = Dio(
           BaseOptions(
@@ -12,6 +13,18 @@ class DioClient {
           ),
         ) {
     _dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        try {
+          // Recupera el token del almacenamiento seguro
+          final token = await _secureStorage.read(key: 'authToken');
+          if (token != null) {
+            options.headers['Authorization'] = 'Bearer $token'; // Agregar token a las cabeceras
+          }
+        } catch (e) {
+          print('Error reading token: $e');
+        }
+        handler.next(options);
+      },
       onResponse: (response, handler) {
         if (response.statusCode == 200) {
           handler.next(response);
@@ -46,4 +59,14 @@ class DioClient {
   }
 
   Dio get dio => _dio;
+
+  // Método para guardar el token
+  Future<void> storeToken(String token) async {
+    await _secureStorage.write(key: 'authToken', value: token);
+  }
+
+  // Método para borrar el token
+  Future<void> clearToken() async {
+    await _secureStorage.delete(key: 'authToken');
+  }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:warehouse_master_mobile/modules/auth/auth_guard.dart';
 import 'package:warehouse_master_mobile/modules/auth/login_screen.dart';
 import 'package:warehouse_master_mobile/modules/entry/screens/entry_screen.dart';
 import 'package:warehouse_master_mobile/modules/home/screens/home_screen.dart';
@@ -17,18 +18,15 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const SplashScreen(),
-        '/login': (context) => const  LoginScreen(),
-        '/app': (context) => const AppBarNavigation(),
-        '/home': (context) => const HomeScreen(),
-        '/output': (context) => const OutputScreen(),
-        '/entry': (context) => const EntryScreen(),
-        '/nav': (context) => const AppBarNavigation(),
-
-      }
-    );
+        debugShowCheckedModeBanner: false,
+        initialRoute: '/',
+        routes: {
+          '/': (context) => const SplashScreen(),
+          '/login': (context) => const LoginScreen(),
+          '/home': (context) => const AuthGuard(child: HomeScreen()),
+          '/output': (context) => const AuthGuard(child: OutputScreen()),
+          '/entry': (context) => const AuthGuard(child: EntryScreen()),
+          '/nav': (context) => const AuthGuard(child: AppBarNavigation()) ,
+        });
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Importar para SharedPreferences
 import 'package:warehouse_master_mobile/styles/theme/app_theme.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -10,6 +11,14 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  // Método para eliminar el token de SharedPreferences
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('auth_token'); // Eliminar el token guardado
+    // Navegar a la pantalla de login o inicio
+    Navigator.pushReplacementNamed(context, '/'); // Redirigir al login
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,9 +72,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: () async {
-                        Navigator.pushNamed(context, "/");
-                      },
+                      onPressed: _logout, // Llamar a la función de logout
                       style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.lightGray,
                           backgroundColor: AppColors.rosePrimary,
