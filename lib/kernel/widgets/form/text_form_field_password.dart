@@ -22,10 +22,11 @@ class _TextFieldPasswordState extends State<TextFieldPassword> {
 
   // Función de validación para el campo de contraseña
   String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
+    /*
+     if (value == null || value.isEmpty) {
       return 'La contraseña es obligatoria';
     }
-    if (value.length < 8) {
+    if (value.length < 5) {
       return 'La contraseña debe tener al menos 8 caracteres';
     }
     if (!RegExp(r'[A-Z]').hasMatch(value)) {
@@ -35,6 +36,8 @@ class _TextFieldPasswordState extends State<TextFieldPassword> {
       return 'La contraseña debe tener al menos un número';
     }
     return null; // Contraseña válida
+    */
+   
   }
 
   @override
