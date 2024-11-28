@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Importar para SharedPreferences
+import 'package:warehouse_master_mobile/kernel/shared/custom_dialog_alert.dart';
 import 'package:warehouse_master_mobile/kernel/utils/dio_client.dart';
 import 'package:warehouse_master_mobile/kernel/widgets/form/text_form_field_email.dart';
 import 'package:warehouse_master_mobile/kernel/widgets/form/text_form_field_password.dart';
@@ -18,41 +19,58 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _username = TextEditingController();
   final TextEditingController _password = TextEditingController();
   final _formKey = GlobalKey<FormState>(); // Clave del formulario
-  late AuthService _authService; 
+  late AuthService _authService;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    final dioClient = DioClient(baseUrl: 'http://129.213.69.201:8080/warehouse-master-api/');
+    final dioClient =
+        DioClient(baseUrl: 'http://129.213.69.201:8081/warehouse-master-api/');
     _authService = AuthService(dio: dioClient.dio);
   }
 
   Future<void> _saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('auth_token', token);  // Guardamos el token en SharedPreferences
+    await prefs.setString(
+        'auth_token', token); // Guardamos el token en SharedPreferences
   }
 
   Future<void> _handleLogin() async {
     if (_formKey.currentState?.validate() ?? false) {
       final email = _username.text.trim();
       final password = _password.text.trim();
-      print('Email ingresado: $email');
+      setState(() {
+        _isLoading = true;
+      });
+      /*
+       print('Email ingresado: $email');
       print('Contraseña ingresada: $password');
-      
+      */
+
       final success = await _authService.login(email, password);
-      
+
       if (success) {
         final token = await _authService.getToken();
         if (token != null) {
           await _saveToken(token);
         }
-
-        print('Inicio de sesión exitoso');
         Navigator.pushNamed(context, '/nav');
       } else {
-        print('Error en el inicio de sesión');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Credenciales inválidas')),
+        setState(() {
+          _isLoading = false; // Desactivar el loader
+        });
+        CustomDialogAlert(context).show(
+          title: 'Error al inicar sesion',
+          icon: const Icon(Icons.error, color: Colors.red),
+          content:
+              const Text('Credenciales invalidas porfavor intente de nuevo'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cerrar',),
+            ),
+          ],
         );
       }
     }
@@ -147,7 +165,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               width: double.infinity,
                               height: 48,
                               child: ElevatedButton(
-                                onPressed: _handleLogin,
+                                onPressed: _isLoading
+                                    ? null
+                                    : _handleLogin, // Desactivar botón mientras carga
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: AppColors.palePinkBackground,
                                   backgroundColor: AppColors.rosePrimary,
@@ -155,7 +175,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                 ),
-                                child: const Text('Iniciar Sesión'),
+                                child: _isLoading
+                                    ? const CircularProgressIndicator(
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Colors.white),
+                                      )
+                                    : const Text('Iniciar Sesión'),
                               ),
                             ),
                             const SizedBox(height: 116),
