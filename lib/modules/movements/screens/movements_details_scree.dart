@@ -274,11 +274,11 @@ Widget _buildProductList() {
             ),
           ),
           Text(
-            'Rack UID: ${destinationRack.uid}, Número: ${destinationRack.rackNumber}',
+            'Rack UID: ${destinationRack?.uid}, Número: ${destinationRack?.rackNumber}',
             style: const TextStyle(fontSize: 14, color: AppColors.deepMaroon),
           ),
           Text(
-            'Capacidad: ${destinationRack.capacity}',
+            'Capacidad: ${destinationRack?.capacity}',
             style: const TextStyle(fontSize: 14, color: AppColors.deepMaroon),
           ),
         ],

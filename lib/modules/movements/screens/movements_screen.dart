@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:warehouse_master_mobile/kernel/widgets/movement_card.dart';
+import 'package:warehouse_master_mobile/kernel/widgets/movement_card_skeleton.dart';
 import 'package:warehouse_master_mobile/models/movements/movement.dart';
 
 class EntryScreen extends StatefulWidget {
@@ -24,7 +25,7 @@ class _EntryScreenState extends State<EntryScreen> {
   Future<void> _fetchTransfers() async {
     try {
       Dio dio = Dio();
-      final response = await dio.get('http://129.213.69.201:8080/warehouse-master-api/movements/');
+      final response = await dio.get('http://129.213.69.201:8081/warehouse-master-api/movements/');
       
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'];
@@ -53,14 +54,19 @@ class _EntryScreenState extends State<EntryScreen> {
         title: const Text('Movimientos'),
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: movements.length,
-              itemBuilder: (context, index) {
-                final movement = movements[index];
-                return MovementCard(movement: movement);
-              },
-            ),
-    );
+        ? ListView.builder(
+            itemCount: 5, // Número de skeletons visibles durante la carga
+            itemBuilder: (context, index) {
+              return const MovementCardSkeleton();
+            },
+          )
+        : ListView.builder(
+            itemCount: movements.length,
+            itemBuilder: (context, index) {
+              final movement = movements[index];
+              return MovementCard(movement: movement);
+            },
+          ),
+  );
   }
 }
