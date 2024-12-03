@@ -19,8 +19,8 @@ class Warehouse {
     return Warehouse(
       uid: json['uid'],
       name: json['name'],
-      location: json['location'],
-      capacity: json['capacity'],
+      location: 'asdasdasdsa',
+      capacity: 10,
       active: json['active'],
       lastModified: json['lastModified'],
     );

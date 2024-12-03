@@ -5,7 +5,7 @@ class Movement {
   final String uid;
   final String status;
   final bool active;
-  final String observations;
+  final String? observations;
   final String lastModified;
   final User assignedUser;
   final List<ProductDetail> products;

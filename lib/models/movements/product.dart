@@ -1,6 +1,7 @@
 import 'package:warehouse_master_mobile/models/movements/category.dart';
 import 'package:warehouse_master_mobile/models/movements/rack.dart';
 import 'package:warehouse_master_mobile/models/movements/supplier.dart';
+import 'package:warehouse_master_mobile/models/movements/warehouse.dart';
 
 class Product {
   final String uid;
@@ -28,6 +29,31 @@ class Product {
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
+    Rack rackElement;
+    if(json.keys.contains('rack')){
+      rackElement = Rack.fromJson(json['rack']);
+    }else{
+      rackElement = Rack(
+        uid: '',
+        rackNumber: '',
+        maxFloor: 0,
+        active: false,
+        lastModified: '',
+        description: '',
+        capacity: 0,
+        warehouse: Warehouse.fromJson(
+          {
+            'uid': '',
+            'name': '',
+            'description': '',
+            'address': '',
+            'active': false,
+            'lastModified': ''
+          }
+        )
+      );
+    }
+
     return Product(
       uid: json['uid'],
       name: json['name'],
@@ -38,7 +64,7 @@ class Product {
       qrCode: json['qrCode'],
       supplier: Supplier.fromJson(json['supplier']),
       category: Category.fromJson(json['category']),
-      rack: Rack.fromJson(json['rack']),
+      rack: rackElement,
     );
   }
 }

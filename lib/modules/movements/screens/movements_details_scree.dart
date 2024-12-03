@@ -135,7 +135,7 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Observaciones: ${transfer.observations}',
+                'Observaciones: ${transfer.observations ?? 'Ninguna'}',
                 style:
                     const TextStyle(fontSize: 14, color: AppColors.deepMaroon),
                 overflow: TextOverflow.ellipsis,

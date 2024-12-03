@@ -21,8 +21,9 @@ class MovementCard extends StatelessWidget {
         ? movement.products.first.product.rack.warehouse.name
         : 'Desconocido';
     final destinationWarehouse = movement.products.isNotEmpty
-        ? movement.products.first.destinationRack.warehouse.name
+        ? movement.products.first.destinationRack?.warehouse.name
         : 'Desconocido';
+       
     return GestureDetector(
       onTap: () {
         // Navegar a la pantalla de detalles
@@ -118,7 +119,7 @@ class MovementCard extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               // Observaciones (si existen)
-              if (movement.observations.isNotEmpty) ...[
+              if (movement.observations?.isNotEmpty ?? false) ...[
                 Text(
                   'Observaciones: ${movement.observations}',
                   style: const TextStyle(
@@ -129,8 +130,8 @@ class MovementCard extends StatelessWidget {
               // Última modificación
               Text(
                 'Última modificación: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(movement.lastModified))}',
-                style: const TextStyle(
-                    fontSize: 12, color: AppColors.lightGray),
+                style:
+                    const TextStyle(fontSize: 12, color: AppColors.lightGray),
               ),
             ],
           ),
