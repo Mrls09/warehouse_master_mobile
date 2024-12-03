@@ -1,5 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:warehouse_master_mobile/modules/auth/auth_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -10,10 +12,25 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   @override
+  @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 1), () {
-      Navigator.pushReplacementNamed(context, '/nav');
+    _checkAuthentication();
+  }
+
+  // Verificar si el usuario está autenticado
+  Future<void> _checkAuthentication() async {
+    final authService = AuthService(dio: Dio());
+    final isAuthenticated = await authService.isAuthenticated();
+
+    Future.delayed(const Duration(seconds: 3), () {
+      if (isAuthenticated) {
+        // Si está autenticado, redirige al NavScreen
+        Navigator.pushReplacementNamed(context, '/nav');
+      } else {
+        // Si no está autenticado, redirige al LoginScreen
+        Navigator.pushReplacementNamed(context, '/login');
+      }
     });
   }
 
