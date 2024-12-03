@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:warehouse_master_mobile/modules/home/screens/home_screen.dart';
+import 'package:warehouse_master_mobile/modules/entry/screens/entry_screen.dart';
 import 'package:warehouse_master_mobile/modules/movements/screens/movements_screen.dart';
 import 'package:warehouse_master_mobile/modules/output/screens/output_screen.dart';
 import 'package:warehouse_master_mobile/modules/profile/screens/profile_screen.dart';
@@ -16,8 +16,8 @@ class _AppBarNavigationState extends State<AppBarNavigation> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    const HomeScreen(),
     const EntryScreen(),
+    const HomeScreen(),
     const OutputScreen(),
     const ProfileScreen(),
 
