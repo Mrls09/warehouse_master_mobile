@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:warehouse_master_mobile/kernel/shared/snackbar_alert.dart';
+import 'package:warehouse_master_mobile/kernel/utils/dio_client.dart';
 import 'package:warehouse_master_mobile/kernel/widgets/movement_card.dart';
 import 'package:warehouse_master_mobile/kernel/widgets/movement_card_skeleton.dart';
 import 'package:warehouse_master_mobile/models/movements/movement.dart';
@@ -25,13 +26,13 @@ class _EntryScreenState extends State<EntryScreen> {
   // Método para realizar la solicitud HTTP a la API
   Future<void> _fetchTransfers() async {
     try {
-      Dio dio = Dio();
+      Dio dio = DioClient(baseUrl: 'http://129.213.69.201:8081').dio;
       final response = await dio
-          .get('http://129.213.69.201:8081/warehouse-master-api/movements/');
+          .get('/warehouse-master-api/movements/');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'];
-        print(data);
+        //print(data);
 
         setState(() {
           movements = data.map((item) => Movement.fromJson(item)).toList();

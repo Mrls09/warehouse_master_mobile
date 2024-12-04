@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:warehouse_master_mobile/kernel/utils/dio_client.dart';
 import 'package:warehouse_master_mobile/modules/auth/auth_service.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -20,7 +21,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   // Verificar si el usuario está autenticado
   Future<void> _checkAuthentication() async {
-    final authService = AuthService(dio: Dio());
+    final authService = AuthService(dio: DioClient(baseUrl: 'http://129.213.69.201:8081').dio);
     final isAuthenticated = await authService.isAuthenticated();
 
     Future.delayed(const Duration(seconds: 3), () {

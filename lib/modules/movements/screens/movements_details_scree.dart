@@ -42,11 +42,9 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
             const SizedBox(height: 8),
             Expanded(
               child: widget.movement.products.length == 1
-                  ? _buildProductDetails(
-                      0)
+                  ? _buildProductDetails(0)
                   : _buildProductList(),
             ),
-            
           ],
         ),
       ),
@@ -55,15 +53,18 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const QrScannerScreen()),
+            MaterialPageRoute(
+              builder: (context) => QRScannerScreen(
+                onQRScanned: (String) {},
+              ),
+            ),
           );
         },
         backgroundColor: AppColors.rosePrimary,
-        foregroundColor:  AppColors.lightGray,
+        foregroundColor: AppColors.lightGray,
         child: const Icon(Icons.camera_alt),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-    
     );
   }
 
@@ -88,8 +89,7 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
               ),
             ),
             Icon(
-              Icons
-                  .check_circle,
+              Icons.check_circle,
               color:
                   transfer.status == 'Completado' ? Colors.green : Colors.red,
             ),
@@ -159,67 +159,71 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
   }
 
   // Lista de productos
-Widget _buildProductList() {
-  return ListView.builder(
-    itemCount: widget.movement.products.length,
-    itemBuilder: (context, index) {
-      final productDetail = widget.movement.products[index];
-      final product = productDetail.product;
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ListTile(
-            title: Text(
-              product.name,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: AppColors.deepMaroon,
-              ),
-            ),
-            subtitle: Text(
-              '${product.description} - ${productDetail.quantity} unidades',
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.deepMaroon,
-              ),
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.qr_code_scanner, color: AppColors.deepMaroon),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const QrScannerScreen(),
-                      ),
-                    );
-                  },
-                ),
-                Icon(
-                  selectedProductIndex == index
-                      ? Icons.expand_less
-                      : Icons.expand_more,
+  Widget _buildProductList() {
+    return ListView.builder(
+      itemCount: widget.movement.products.length,
+      itemBuilder: (context, index) {
+        final productDetail = widget.movement.products[index];
+        final product = productDetail.product;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ListTile(
+              title: Text(
+                product.name,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
                   color: AppColors.deepMaroon,
                 ),
-              ],
+              ),
+              subtitle: Text(
+                '${product.description} - ${productDetail.quantity} unidades',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.deepMaroon,
+                ),
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.qr_code_scanner,
+                        color: AppColors.deepMaroon),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => QRScannerScreen(
+                            onQRScanned: (String) {},
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  Icon(
+                    selectedProductIndex == index
+                        ? Icons.expand_less
+                        : Icons.expand_more,
+                    color: AppColors.deepMaroon,
+                  ),
+                ],
+              ),
+              onTap: () {
+                setState(() {
+                  selectedProductIndex =
+                      selectedProductIndex == index ? null : index;
+                });
+              },
             ),
-            onTap: () {
-              setState(() {
-                selectedProductIndex =
-                    selectedProductIndex == index ? null : index;
-              });
-            },
-          ),
-          if (selectedProductIndex == index) _buildProductDetails(index),
-          const Divider(color: AppColors.softPinkBackground, thickness: 1),
-        ],
-      );
-    },
-  );
-}
+            if (selectedProductIndex == index) _buildProductDetails(index),
+            const Divider(color: AppColors.softPinkBackground, thickness: 1),
+          ],
+        );
+      },
+    );
+  }
+
   // Detalles del producto seleccionado
   Widget _buildProductDetails(int index) {
     final productDetail = widget.movement.products[index];

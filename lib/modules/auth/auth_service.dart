@@ -31,6 +31,7 @@ class AuthService {
           // Guardar token en SharedPreferences
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('auth_token', token);
+          
 
           return true; // Inicio de sesión exitoso
         } else {
