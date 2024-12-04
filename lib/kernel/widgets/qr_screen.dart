@@ -3,10 +3,12 @@ import 'package:qr_code_dart_scan/qr_code_dart_scan.dart';
 
 class QRScannerScreen extends StatefulWidget {
   final Function(String) onQRScanned;
+  final Map<String, bool> items;
 
   const QRScannerScreen({
     Key? key,
     required this.onQRScanned,
+    required this.items
   }) : super(key: key);
 
   @override
@@ -14,6 +16,16 @@ class QRScannerScreen extends StatefulWidget {
 }
 
 class _QRScannerScreenState extends State<QRScannerScreen> {
+
+  late Map<String, bool> _editableItems;
+
+  @override
+  void initState() {
+    super.initState();
+    // Clona la lista para evitar modificar directamente los datos del padre
+    _editableItems = widget.items;
+  }
+
   bool _isScanning = true;
 
   @override
@@ -35,7 +47,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             if (result.text != null && result.text.isNotEmpty) {
               widget.onQRScanned(result
                   .text); // Pasar la información del QR a la función que manejas.
-              _showScanResultDialog(result.text); // Mostrar el resultado.
+              _editableItems[result.text] = true; // Marcar el item como escaneado
+                
+              _showScanResultDialog(_editableItems.toString() ); // Mostrar el resultado.
             } else {
               _showScanResultDialog("No se pudo leer el código QR.");
             }

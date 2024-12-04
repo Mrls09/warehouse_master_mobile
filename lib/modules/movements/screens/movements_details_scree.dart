@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:warehouse_master_mobile/kernel/shared/snackbar_alert.dart';
 import 'package:warehouse_master_mobile/kernel/widgets/qr_screen.dart';
 import 'package:warehouse_master_mobile/models/movements/movement.dart';
 import 'package:warehouse_master_mobile/styles/theme/app_theme.dart';
@@ -14,6 +15,47 @@ class MovementDetailsScreen extends StatefulWidget {
 }
 
 class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
+
+  Map<String, bool> createProductMap(List<dynamic> products) {
+  return {
+    for (var product in products) 
+      product.product.uid: false, // Extrae el UID y asigna false como valor
+  };
+}
+  late Map<String, bool> items;
+  @override
+  void initState() {
+    super.initState();
+    items = createProductMap(widget.movement.products);
+    print(widget.movement.products[0].product.uid);
+    // Clona la lista para evitar modificar directamente los datos del padreprint()
+  }
+
+
+  void _navigateToChild() async {
+    final updatedItems = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => QRScannerScreen(
+          items: items, onQRScanned: (String ) {  },
+        ),
+      ),
+    );
+
+    print(updatedItems.toString());
+
+    // Actualiza la lista solo si el hijo regresó datos
+    if (updatedItems != null && updatedItems is Map<String, bool>) {
+    setState(() {
+      items = {...updatedItems}; // Forzar una nueva asignación para que Flutter lo detecte.
+    });
+  } else {
+    setState(() {
+      // Esto asegura que el widget se vuelva a construir incluso si `updatedItems` es nulo.
+      items = {...items};
+    });
+  }
+  }
   int? selectedProductIndex;
 
   @override
@@ -43,19 +85,19 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
             Expanded(
               child: widget.movement.products.length == 1
                   ? _buildProductDetails(0)
-                  : _buildProductList(),
+                  : _buildProductList(items),
             ),
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomButton(),
+      bottomNavigationBar: _buildBottomButton(items),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => QRScannerScreen(
-                onQRScanned: (String) {},
+              builder: (context) => Placeholder(
+                //onQRScanned: (String) {},
               ),
             ),
           );
@@ -159,7 +201,7 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
   }
 
   // Lista de productos
-  Widget _buildProductList() {
+  Widget _buildProductList(Map<String, bool> items) {
     return ListView.builder(
       itemCount: widget.movement.products.length,
       itemBuilder: (context, index) {
@@ -171,10 +213,10 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
             ListTile(
               title: Text(
                 product.name,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color: AppColors.deepMaroon,
+                  color:  items[product.uid] == true ? AppColors.deepMaroon: const Color.fromARGB(255, 152, 131, 138),
                 ),
               ),
               subtitle: Text(
@@ -190,16 +232,7 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
                   IconButton(
                     icon: const Icon(Icons.qr_code_scanner,
                         color: AppColors.deepMaroon),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => QRScannerScreen(
-                            onQRScanned: (String) {},
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: _navigateToChild,
                   ),
                   Icon(
                     selectedProductIndex == index
@@ -291,25 +324,38 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
   }
 
   // Botón en la parte inferior
-  Widget _buildBottomButton() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-      child: ElevatedButton(
-        onPressed: () {
-          print('Acción: Iniciar Entrada');
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.deepMaroon,
-          minimumSize: const Size(double.infinity, 50),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(25.0),
-          ),
-        ),
-        child: const Text(
-          'Iniciar Entrada',
-          style: TextStyle(fontSize: 16, color: Colors.white),
+  Widget _buildBottomButton(Map<String, bool> items) {
+  // Verifica si todos los valores en el mapa son `true`
+  final allTrue = items.values.every((value) => value == true);
+
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+    child: ElevatedButton(
+      onPressed: () {
+        if (allTrue) {
+          print('Acción: Todos los productos están marcados como completos.');
+        } else {
+          SnackbarAlert(context).show(
+            message: 'Faltan productos por marcar.',
+            backgroundColor: AppColors.softPinkBackground,
+          );
+          print('Acción: Faltan productos por marcar.');
+        }
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor:
+            allTrue ? AppColors.deepMaroon : Colors.grey, // Cambia el color dinámicamente
+        minimumSize: const Size(double.infinity, 50),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(25.0),
         ),
       ),
-    );
-  }
+      child: const Text(
+        'Iniciar Entrada',
+        style: TextStyle(fontSize: 16, color: Colors.white),
+      ),
+    ),
+  );
+}
+
 }
