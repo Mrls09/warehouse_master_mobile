@@ -63,6 +63,11 @@ class MovementCard extends StatelessWidget {
                       color: AppColors.deepMaroon,
                     ),
                   ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
                   Text(
                     'Total: $totalProducts productos',
                     style: const TextStyle(
