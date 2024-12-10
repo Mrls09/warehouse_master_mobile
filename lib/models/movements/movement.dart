@@ -34,3 +34,24 @@ class Movement {
     );
   }
 }
+
+
+const Map<String, String> statusDescriptions = {
+  'UNASSIGNED_ENTRY': 'Entrada no asignada',
+  'UNASSIGNED_EXIT': 'Salida no asignada',
+  'UNASSIGNED_TRANSFER': 'Transferencia no asignada',
+  'UNASSIGNED_ADJUSTMENT': 'Ajuste no asignado',
+  'ASSIGNED_ENTRY': 'Entrada asignada',
+  'ASSIGNED_EXIT': 'Salida asignada',
+  'ASSIGNED_TRANSFER': 'Transferencia asignada',
+  'ASSIGNED_ADJUSTMENT': 'Ajuste asignado',
+  'PENDING_ENTRY': 'Entrada pendiente',
+  'PENDING_EXIT': 'Salida pendiente',
+  'PENDING_TRANSFER': 'Transferencia pendiente',
+  'PENDING_ADJUSTMENT': 'Ajuste pendiente',
+  'ENTRY': 'Entrada',
+  'EXIT': 'Salida',
+  'TRANSFER': 'Transferencia',
+  'ADJUSTMENT': 'Ajuste',
+  'CANCELLED': 'Cancelado',
+};

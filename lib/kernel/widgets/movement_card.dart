@@ -11,6 +11,11 @@ class MovementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Descripciones de los estados de los movimientos
+    String getStatusDescription(String status) {
+      return statusDescriptions[status] ?? 'Estado desconocido';
+    }
+
     // Calcular el total de productos
     final totalProducts = movement.products.fold<int>(
       0,
@@ -23,7 +28,7 @@ class MovementCard extends StatelessWidget {
     final destinationWarehouse = movement.products.isNotEmpty
         ? movement.products.first.destinationRack?.warehouse.name
         : 'Desconocido';
-       
+
     return GestureDetector(
       onTap: () {
         // Navegar a la pantalla de detalles
@@ -51,10 +56,10 @@ class MovementCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'UID: ${movement.uid.length > 10 ? movement.uid.substring(0, 10) : movement.uid}',
+                    'UID: ${movement.uid}',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                      fontSize: 10,
                       color: AppColors.deepMaroon,
                     ),
                   ),
@@ -80,7 +85,10 @@ class MovementCard extends StatelessWidget {
                       Text(
                         'De: $sourceWarehouse',
                         style: const TextStyle(
-                            fontSize: 14, color: AppColors.deepMaroon),
+                            fontSize: 14, color: AppColors.deepMaroon,
+                            fontWeight: FontWeight.bold
+                            ),
+                          
                       ),
                     ],
                   ),
@@ -107,11 +115,10 @@ class MovementCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Estado: ${movement.status}',
+                      'Estado: ${getStatusDescription(movement.status)}',
                       style: const TextStyle(
                         fontSize: 14,
                         color: AppColors.deepMaroon,
-                        fontStyle: FontStyle.italic,
                       ),
                     ),
                   ),
@@ -119,20 +126,38 @@ class MovementCard extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               // Observaciones (si existen)
-              if (movement.observations?.isNotEmpty ?? false) ...[
-                Text(
-                  'Observaciones: ${movement.observations}',
-                  style: const TextStyle(
-                      fontSize: 14, color: AppColors.deepMaroon),
-                ),
-                const SizedBox(height: 10),
-              ],
-              // Última modificación
-              Text(
-                'Última modificación: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(movement.lastModified))}',
-                style:
-                    const TextStyle(fontSize: 12, color: AppColors.lightGray),
+              Row(
+                children: [
+                  const Icon(Icons.notes,
+                      size: 18, color: AppColors.deepMaroon),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      movement.observations?.isNotEmpty ?? false
+                          ? 'Observaciones: ${movement.observations}'
+                          : 'N/A',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.deepMaroon,
+                      ),
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const Icon(Icons.date_range,
+                      size: 18, color: AppColors.deepMaroon),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Última modificación: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(movement.lastModified))}',
+                    style: const TextStyle(
+                        fontSize: 12, color: AppColors.lightGray),
+                  ),
+                ],
+              )
+              // Última modificación
             ],
           ),
         ),

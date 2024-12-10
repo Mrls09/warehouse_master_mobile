@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:warehouse_master_mobile/kernel/shared/snackbar_alert.dart';
@@ -6,14 +9,14 @@ import 'package:warehouse_master_mobile/kernel/widgets/movement_card.dart';
 import 'package:warehouse_master_mobile/kernel/widgets/movement_card_skeleton.dart';
 import 'package:warehouse_master_mobile/models/movements/movement.dart';
 
-class EntryScreen extends StatefulWidget {
-  const EntryScreen({super.key});
+class MovementScreen extends StatefulWidget {
+  const MovementScreen({super.key});
 
   @override
-  State<EntryScreen> createState() => _EntryScreenState();
+  State<MovementScreen> createState() => _MovementScreenState();
 }
 
-class _EntryScreenState extends State<EntryScreen> {
+class _MovementScreenState extends State<MovementScreen> {
   List<Movement> movements = [];
   bool isLoading = true;
 
@@ -23,12 +26,14 @@ class _EntryScreenState extends State<EntryScreen> {
     _fetchTransfers();
   }
 
+
   // Método para realizar la solicitud HTTP a la API
   Future<void> _fetchTransfers() async {
     try {
-      Dio dio = DioClient(baseUrl: 'http://129.213.69.201:8081').dio;
+      Dio dio = DioClient(baseUrl: 'https://az3dtour.online:8443').dio;
       final response = await dio
           .get('/warehouse-master-api/movements/');
+        
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'];

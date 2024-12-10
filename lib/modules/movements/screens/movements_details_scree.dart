@@ -1,6 +1,11 @@
+import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:warehouse_master_mobile/kernel/shared/custom_dialog_alert.dart';
 import 'package:warehouse_master_mobile/kernel/shared/snackbar_alert.dart';
+import 'package:warehouse_master_mobile/kernel/widgets/camera_component.dart';
 import 'package:warehouse_master_mobile/kernel/widgets/qr_screen.dart';
 import 'package:warehouse_master_mobile/models/movements/movement.dart';
 import 'package:warehouse_master_mobile/styles/theme/app_theme.dart';
@@ -15,61 +20,139 @@ class MovementDetailsScreen extends StatefulWidget {
 }
 
 class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
+  String? _base64Image;
+
+  String getStatusDescription(String status) {
+    return statusDescriptions[status] ?? 'Estado desconocido';
+  }
 
   Map<String, bool> createProductMap(List<dynamic> products) {
-  return {
-    for (var product in products) 
-      product.product.uid: false, // Extrae el UID y asigna false como valor
-  };
-}
+    return {
+      for (var product in products) product.product.uid: false,
+    };
+  }
+
   late Map<String, bool> items;
+
   @override
   void initState() {
     super.initState();
     items = createProductMap(widget.movement.products);
     print(widget.movement.products[0].product.uid);
-    // Clona la lista para evitar modificar directamente los datos del padreprint()
   }
 
+  Future<void> _updateTransferStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? authToken = prefs.getString('auth_token');
+
+    final Dio dio = Dio(
+      BaseOptions(
+        baseUrl: 'https://az3dtour.online:8443',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+      ),
+    );
+
+    // Validación: asegurarse de que todos los productos hayan sido escaneados
+    if (!items.values.every((value) => value == true)) {
+      CustomDialogAlert(context).show(
+        title: 'Acción requerida',
+        content: const Text(
+            'Todos los productos deben ser escaneados antes de continuar.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cerrar'),
+          ),
+        ],
+      );
+      return;
+    }
+
+    try {
+      final Map<String, dynamic> body = {
+        "uid": widget.movement.uid,
+        "image": _base64Image,
+      };
+
+      print('Request URL: /warehouse-master-api/movements/pending/');
+      print('Request Body: ${jsonEncode(body)}');
+      print('Image Length: ${_base64Image?.length ?? "No image"}');
+
+      final Response response = await dio.put(
+        '/warehouse-master-api/movements/pending/',
+        data: jsonEncode(body),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        SnackbarAlert(context).show(
+          message: 'Movimiento actualizado exitosamente',
+          backgroundColor: Colors.green,
+        );
+      } else {
+        print(
+            "Error en la petición: ${response.statusCode} - ${response.data}");
+        SnackbarAlert(context).show(
+          message: 'Error en la solicitud',
+          backgroundColor: Colors.red,
+        );
+      }
+    } catch (e) {
+      if (e is DioException) {
+        print('Dio Error Response: ${e.response?.data}');
+        print('Dio Error Status Code: ${e.response?.statusCode}');
+      }
+      print("Error en la solicitud: $e");
+      SnackbarAlert(context).show(
+        message: 'Error en la solicitud',
+        backgroundColor: Colors.red,
+      );
+    }
+  }
 
   void _navigateToChild() async {
     final updatedItems = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => QRScannerScreen(
-          items: items, onQRScanned: (String ) {  },
+          items: items,
+          onQRScanned: (String) {},
         ),
       ),
     );
 
     print(updatedItems.toString());
 
-    // Actualiza la lista solo si el hijo regresó datos
     if (updatedItems != null && updatedItems is Map<String, bool>) {
-    setState(() {
-      items = {...updatedItems}; // Forzar una nueva asignación para que Flutter lo detecte.
-    });
-  } else {
-    setState(() {
-      // Esto asegura que el widget se vuelva a construir incluso si `updatedItems` es nulo.
-      items = {...items};
-    });
+      setState(() {
+        items = {...updatedItems};
+      });
+    } else {
+      setState(() {
+        items = {...items};
+      });
+    }
   }
-  }
+
   int? selectedProductIndex;
 
   @override
   Widget build(BuildContext context) {
+    final transfer = widget.movement;
+    final isPendingEntry = transfer.status == 'PENDING_ENTRY';
+    final isEntry = transfer.status == 'ENTRY'; // Estado ENTRY
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Detalles del Movimient'),
+        title: const Text('Detalles del Movimiento'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Información general del movimiento (usuario, estado, total de productos)
             _buildTransferGeneralInfo(),
             const SizedBox(height: 16),
             const Divider(color: AppColors.softPinkBackground, thickness: 2),
@@ -83,34 +166,65 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
             ),
             const SizedBox(height: 8),
             Expanded(
-              child: widget.movement.products.length == 1
-                  ? _buildProductDetails(0)
-                  : _buildProductList(items),
+              child: _buildProductList(items),
             ),
+            if (isPendingEntry)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16.0),
+                child: Text(
+                  'Este movimiento está en proceso de ingreso al almacén.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.orange,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            if (isEntry)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16.0),
+                child: Text(
+                  'Este movimiento ya ha sido ingresado y colocado en el almacén.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomButton(items),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => Placeholder(
-                //onQRScanned: (String) {},
-              ),
-            ),
-          );
-        },
-        backgroundColor: AppColors.rosePrimary,
-        foregroundColor: AppColors.lightGray,
-        child: const Icon(Icons.camera_alt),
-      ),
+      bottomNavigationBar: !isPendingEntry && !isEntry
+          ? _buildBottomButton(items)
+          : null, // No se muestra en ENTRY
+      floatingActionButton:
+          !isPendingEntry && !isEntry // No se muestra en ENTRY
+              ? FloatingActionButton(
+                  onPressed: () async {
+                    final base64Image = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ImagePickerComponent(),
+                      ),
+                    );
+
+                    if (base64Image != null) {
+                      setState(() {
+                        _base64Image = base64Image;
+                        print('Imagen desde details screen: $_base64Image');
+                      });
+                    }
+                  },
+                  backgroundColor: AppColors.rosePrimary,
+                  foregroundColor: AppColors.lightGray,
+                  child: const Icon(Icons.camera_alt),
+                )
+              : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
-  // Información general del movimiento
   Widget _buildTransferGeneralInfo() {
     final transfer = widget.movement;
     return Column(
@@ -121,7 +235,7 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
           children: [
             Expanded(
               child: Text(
-                'Estado: ${transfer.status}',
+                'Estado: ${getStatusDescription(transfer.status)}',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
@@ -138,7 +252,6 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
           ],
         ),
         const SizedBox(height: 8),
-        // Información del usuario que realizó el movimiento
         Row(
           children: [
             const Icon(Icons.person, size: 18, color: AppColors.deepRedAccent),
@@ -200,7 +313,6 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
     );
   }
 
-  // Lista de productos
   Widget _buildProductList(Map<String, bool> items) {
     return ListView.builder(
       itemCount: widget.movement.products.length,
@@ -216,7 +328,9 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color:  items[product.uid] == true ? AppColors.deepMaroon: const Color.fromARGB(255, 152, 131, 138),
+                  color: items[product.uid] == true
+                      ? AppColors.deepMaroon
+                      : const Color.fromARGB(255, 152, 131, 138),
                 ),
               ),
               subtitle: Text(
@@ -257,7 +371,6 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
     );
   }
 
-  // Detalles del producto seleccionado
   Widget _buildProductDetails(int index) {
     final productDetail = widget.movement.products[index];
     final product = productDetail.product;
@@ -323,39 +436,30 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
     );
   }
 
-  // Botón en la parte inferior
   Widget _buildBottomButton(Map<String, bool> items) {
-  // Verifica si todos los valores en el mapa son `true`
-  final allTrue = items.values.every((value) => value == true);
+    final allTrue = items.values.every((value) => value == true);
+    final isPendingEntry = widget.movement.status == 'PENDING_ENTRY';
 
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-    child: ElevatedButton(
-      onPressed: () {
-        if (allTrue) {
-          print('Acción: Todos los productos están marcados como completos.');
-        } else {
-          SnackbarAlert(context).show(
-            message: 'Faltan productos por marcar.',
-            backgroundColor: AppColors.softPinkBackground,
-          );
-          print('Acción: Faltan productos por marcar.');
-        }
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor:
-            allTrue ? AppColors.deepMaroon : Colors.grey, // Cambia el color dinámicamente
-        minimumSize: const Size(double.infinity, 50),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25.0),
+    if (isPendingEntry) {
+      return SizedBox.shrink(); // No se muestra el botón
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+      child: ElevatedButton(
+        onPressed: _updateTransferStatus,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: allTrue ? AppColors.deepMaroon : Colors.grey,
+          minimumSize: const Size(double.infinity, 50),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25.0),
+          ),
+        ),
+        child: const Text(
+          'Iniciar Entrada',
+          style: TextStyle(fontSize: 16, color: Colors.white),
         ),
       ),
-      child: const Text(
-        'Iniciar Entrada',
-        style: TextStyle(fontSize: 16, color: Colors.white),
-      ),
-    ),
-  );
-}
-
+    );
+  }
 }

@@ -22,9 +22,9 @@ class MainApp extends StatelessWidget {
         routes: {
           '/': (context) => const SplashScreen(),
           '/login': (context) => const LoginScreen(),
-          '/home': (context) => const AuthGuard(child: HomeScreen()),
+          '/home': (context) => const AuthGuard(child: EntryScreen()),
           '/output': (context) => const AuthGuard(child: OutputScreen()),
-          '/entry': (context) => const AuthGuard(child: EntryScreen()),
+          '/entry': (context) => const AuthGuard(child: MovementScreen()),
           '/nav': (context) => const AuthGuard(child: AppBarNavigation()) ,
         });
   }

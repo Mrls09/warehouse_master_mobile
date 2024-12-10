@@ -16,8 +16,8 @@ class _AppBarNavigationState extends State<AppBarNavigation> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
+    const MovementScreen(),
     const EntryScreen(),
-    const HomeScreen(),
     const OutputScreen(),
     const ProfileScreen(),
 

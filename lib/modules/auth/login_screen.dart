@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     final dioClient =
-        DioClient(baseUrl: 'http://129.213.69.201:8081/warehouse-master-api/');
+        DioClient(baseUrl: 'https://az3dtour.online:8443/warehouse-master-api/');
     _authService = AuthService(dio: dioClient.dio);
   }
 
