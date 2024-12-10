@@ -43,15 +43,13 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         _isLoading = true;
       });
-      /*
-       print('Email ingresado: $email');
-      print('Contraseña ingresada: $password');
-      */
-
+   
       final success = await _authService.login(email, password);
 
       if (success) {
         final token = await _authService.getToken();
+        final uid = await _authService.getUid();
+        print('UID guardado: $uid');
         if (token != null) {
           await _saveToken(token);
         }

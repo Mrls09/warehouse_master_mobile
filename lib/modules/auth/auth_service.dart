@@ -26,13 +26,17 @@ class AuthService {
         // Verificar si existe el token
         if (responseData != null && responseData['data'] != null) {
           final String token = responseData['data']['token'];
-          print('Token recibido: $token');
-
+          final String uid = responseData['data']['user']['uid'];
+          final String role = responseData['data']['user']['role'];
+          final String warehouse = responseData['data']['user']['warehouse'];
+         
           // Guardar token en SharedPreferences
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('auth_token', token);
-          
-
+          await prefs.setString('auth_uid', uid);
+          await prefs.setString('auth_role', role);
+          await prefs.setString('auth_warehouse', warehouse);
+  
           return true; // Inicio de sesión exitoso
         } else {
           print('Respuesta inesperada: ${response.data}');
@@ -65,5 +69,20 @@ class AuthService {
   Future<bool> isAuthenticated() async {
     final token = await getToken();
     return token != null && token.isNotEmpty;
+  }
+
+   Future<String?> getUid() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('auth_uid');
+  }
+
+  Future<String?> getRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('auth_role');
+  }
+
+  Future<String?> getWarehouse() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('auth_warehouse');
   }
 }
