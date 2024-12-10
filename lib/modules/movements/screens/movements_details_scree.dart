@@ -440,8 +440,12 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
     final allTrue = items.values.every((value) => value == true);
     final isPendingEntry = widget.movement.status == 'PENDING_ENTRY';
 
+    String buttonText = widget.movement.status == 'ASSIGNED_ENTRY'
+        ? 'Iniciar Entrada'
+        : 'Iniciar Salida';
+
     if (isPendingEntry) {
-      return SizedBox.shrink(); // No se muestra el botón
+      return const SizedBox.shrink(); // No se muestra el botón
     }
 
     return Padding(
@@ -455,9 +459,9 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
             borderRadius: BorderRadius.circular(25.0),
           ),
         ),
-        child: const Text(
-          'Iniciar Entrada',
-          style: TextStyle(fontSize: 16, color: Colors.white),
+        child: Text(
+          buttonText,
+          style: const TextStyle(fontSize: 16, color: Colors.white),
         ),
       ),
     );
