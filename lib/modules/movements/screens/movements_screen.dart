@@ -189,7 +189,9 @@ class _MovementScreenState extends State<MovementScreen> {
 
     return Scaffold(
       appBar: AppBar(
+
         title: const Text('Movimientos'),
+        
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),
