@@ -74,13 +74,8 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
     try {
       final Map<String, dynamic> body = {
         "uid": widget.movement.uid,
-        "image": _base64Image,
+        "photo": "data:image/png;base64,$_base64Image",
       };
-
-      print('Request URL: /warehouse-master-api/movements/pending/');
-      print('Request Body: ${jsonEncode(body)}');
-      print('Image Length: ${_base64Image?.length ?? "No image"}');
-
       final Response response = await dio.put(
         '/warehouse-master-api/movements/pending/',
         data: jsonEncode(body),

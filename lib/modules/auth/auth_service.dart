@@ -28,14 +28,12 @@ class AuthService {
           final String token = responseData['data']['token'];
           final String uid = responseData['data']['user']['uid'];
           final String role = responseData['data']['user']['role'];
-          final String warehouse = responseData['data']['user']['warehouse'];
          
           // Guardar token en SharedPreferences
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('auth_token', token);
           await prefs.setString('auth_uid', uid);
           await prefs.setString('auth_role', role);
-          await prefs.setString('auth_warehouse', warehouse);
   
           return true; // Inicio de sesión exitoso
         } else {
