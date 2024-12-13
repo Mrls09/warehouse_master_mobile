@@ -7,18 +7,18 @@ class TextFieldEmail extends StatefulWidget {
   final String labelText;
 
   const TextFieldEmail({
-    Key? key,
+    super.key,
     required this.controller,
     this.hintText = 'Correo electrónico',
     this.labelText = 'Correo electrónico',
-  }) : super(key: key);
+  });
 
   @override
+  // ignore: library_private_types_in_public_api
   _TextFieldEmailState createState() => _TextFieldEmailState();
 }
 
 class _TextFieldEmailState extends State<TextFieldEmail> {
-  String? _errorText;
 
   final RegExp _emailRegex = RegExp(
     r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
@@ -63,7 +63,6 @@ class _TextFieldEmailState extends State<TextFieldEmail> {
       style: const TextStyle(color: AppColors.deepMaroon),
       onChanged: (value) {
         setState(() {
-          _errorText = _validateEmail(value);
         });
       },
     );

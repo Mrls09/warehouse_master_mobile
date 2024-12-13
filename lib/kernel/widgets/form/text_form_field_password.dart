@@ -14,6 +14,7 @@ class TextFieldPassword extends StatefulWidget {
   });
 
   @override
+  // ignore: library_private_types_in_public_api
   _TextFieldPasswordState createState() => _TextFieldPasswordState();
 }
 
@@ -22,6 +23,8 @@ class _TextFieldPasswordState extends State<TextFieldPassword> {
 
   // Función de validación para el campo de contraseña
   String? _validatePassword(String? value) {
+    return null;
+  
     /*
      if (value == null || value.isEmpty) {
       return 'La contraseña es obligatoria';

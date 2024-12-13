@@ -9,14 +9,14 @@ class PaginatedList<T> extends StatelessWidget {
   final Widget? emptyWidget;
 
   const PaginatedList({
-    Key? key,
+    super.key,
     required this.items,
     required this.currentPage,
     required this.itemsPerPage,
     required this.itemBuilder,
     this.isLoading = false,
     this.emptyWidget,
-  }) : super(key: key);
+  });
 
   // Obtener elementos paginados
   List<T> get paginatedItems {

@@ -6,10 +6,10 @@ class QRScannerScreen extends StatefulWidget {
   final Map<String, bool> items;
 
   const QRScannerScreen({
-    Key? key,
+    super.key,
     required this.onQRScanned,
     required this.items
-  }) : super(key: key);
+  });
 
   @override
   State<QRScannerScreen> createState() => _QRScannerScreenState();
@@ -44,7 +44,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             });
 
             // Validación del contenido del QR
-            if (result.text != null && result.text.isNotEmpty) {
+            if (result.text.isNotEmpty) {
               widget.onQRScanned(result
                   .text); // Pasar la información del QR a la función que manejas.
               _editableItems[result.text] = true; // Marcar el item como escaneado

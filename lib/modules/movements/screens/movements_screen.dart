@@ -7,6 +7,13 @@ import 'package:warehouse_master_mobile/kernel/widgets/movement_card.dart';
 import 'package:warehouse_master_mobile/kernel/widgets/movement_card_skeleton.dart';
 import 'package:warehouse_master_mobile/models/movements/movement.dart';
 
+const Map<String, String> statusDescriptions = {
+  'PENDING': 'Pendiente',
+  'IN_PROGRESS': 'En Progreso',
+  'COMPLETED': 'Completado',
+  'CANCELLED': 'Cancelado'
+};
+
 class MovementScreen extends StatefulWidget {
   const MovementScreen({super.key});
 
@@ -18,13 +25,12 @@ class _MovementScreenState extends State<MovementScreen> {
   List<Movement> allMovements = [];
   List<Movement> filteredMovements = [];
   bool isLoading = true;
+  bool isRefreshing = false;
   
-  // Filter options
   String currentFilter = 'All';
   DateTime? selectedDate;
   String? selectedStatus;
 
-  // Pagination
   int currentPage = 1;
   int itemsPerPage = 5;
   final List<int> itemsPerPageOptions = [5, 10, 15, 20, 25];
@@ -35,9 +41,14 @@ class _MovementScreenState extends State<MovementScreen> {
     _fetchTransfers();
   }
 
-  // Fetch movements from API
-  Future<void> _fetchTransfers() async {
+  Future<void> _fetchTransfers({bool isRefresh = false}) async {
     try {
+      if (isRefresh) {
+        setState(() {
+          isRefreshing = true;
+        });
+      }
+
       Dio dio = DioClient(baseUrl: 'https://az3dtour.online:8443').dio;
       final response = await dio.get('/warehouse-master-api/movements/');
 
@@ -48,11 +59,13 @@ class _MovementScreenState extends State<MovementScreen> {
           allMovements = data.map((item) => Movement.fromJson(item)).toList();
           filteredMovements = List.from(allMovements);
           isLoading = false;
+          isRefreshing = false;
         });
       } else {
         print('Error en la solicitud: ${response.statusCode}');
         setState(() {
           isLoading = false;
+          isRefreshing = false;
         });
       }
     } catch (e) {
@@ -61,15 +74,15 @@ class _MovementScreenState extends State<MovementScreen> {
       );
       setState(() {
         isLoading = false;
+        isRefreshing = false;
       });
     }
   }
 
-  // Apply filters
   void _applyFilter(String filter) {
     setState(() {
       currentFilter = filter;
-      currentPage = 1; // Reset to first page when changing filter
+      currentPage = 1;
       
       switch (filter) {
         case 'All':
@@ -92,7 +105,6 @@ class _MovementScreenState extends State<MovementScreen> {
     });
   }
 
-  // Paginated movements
   List<Movement> get paginatedMovements {
     final startIndex = (currentPage - 1) * itemsPerPage;
     final endIndex = startIndex + itemsPerPage;
@@ -101,7 +113,6 @@ class _MovementScreenState extends State<MovementScreen> {
         : filteredMovements.sublist(startIndex);
   }
 
-  // Show date picker for selecting a specific date
   void _showDatePicker() async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -113,7 +124,7 @@ class _MovementScreenState extends State<MovementScreen> {
     if (picked != null) {
       setState(() {
         selectedDate = picked;
-        currentPage = 1; // Reset to first page
+        currentPage = 1;
         filteredMovements = allMovements.where((movement) {
           final lastModified = DateTime.parse(movement.lastModified);
           return lastModified.year == picked.year &&
@@ -124,7 +135,6 @@ class _MovementScreenState extends State<MovementScreen> {
     }
   }
 
-  // Show status filter dialog
   void _showStatusFilterDialog() {
     showDialog(
       context: context,
@@ -139,7 +149,7 @@ class _MovementScreenState extends State<MovementScreen> {
                   onTap: () {
                     setState(() {
                       selectedStatus = status;
-                      currentPage = 1; // Reset to first page
+                      currentPage = 1;
                       filteredMovements = allMovements.where((movement) {
                         return movement.status == status;
                       }).toList();
@@ -155,7 +165,6 @@ class _MovementScreenState extends State<MovementScreen> {
     );
   }
 
-  // Show items per page selector
   void _showItemsPerPageDialog() {
     showDialog(
       context: context,
@@ -170,7 +179,6 @@ class _MovementScreenState extends State<MovementScreen> {
                 onTap: () {
                   setState(() {
                     itemsPerPage = option;
-                    currentPage = 1; // Reset to first page
                   });
                   Navigator.of(context).pop();
                 },
@@ -184,14 +192,11 @@ class _MovementScreenState extends State<MovementScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Calculate total pages
     final totalPages = (filteredMovements.length / itemsPerPage).ceil();
 
     return Scaffold(
       appBar: AppBar(
-
         title: const Text('Movimientos'),
-        
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),
@@ -203,7 +208,6 @@ class _MovementScreenState extends State<MovementScreen> {
           preferredSize: const Size.fromHeight(100),
           child: Column(
             children: [
-              // Filter chips
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -215,7 +219,6 @@ class _MovementScreenState extends State<MovementScreen> {
                   ],
                 ),
               ),
-              // Pagination info and controls
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: Row(
@@ -246,55 +249,57 @@ class _MovementScreenState extends State<MovementScreen> {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          // Show selected filter details
-          if (currentFilter == 'Date' && selectedDate != null)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                'Fecha seleccionada: ${DateFormat('dd/MM/yyyy').format(selectedDate!)}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await _fetchTransfers(isRefresh: true);
+        },
+        child: Column(
+          children: [
+            if (currentFilter == 'Date' && selectedDate != null)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Fecha seleccionada: ${DateFormat('dd/MM/yyyy').format(selectedDate!)}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            if (currentFilter == 'Status' && selectedStatus != null)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Estado: ${statusDescriptions[selectedStatus] ?? selectedStatus}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            Expanded(
+              child: Scrollbar(
+                thumbVisibility: true,
+                child: isLoading
+                    ? ListView.builder(
+                        itemCount: 5,
+                        itemBuilder: (context, index) {
+                          return const MovementCardSkeleton();
+                        },
+                      )
+                    : filteredMovements.isEmpty
+                        ? const Center(
+                            child: Text('No hay movimientos para mostrar'),
+                          )
+                        : ListView.builder(
+                            itemCount: paginatedMovements.length,
+                            itemBuilder: (context, index) {
+                              final movement = paginatedMovements[index];
+                              return MovementCard(movement: movement);
+                            },
+                          ),
               ),
             ),
-          if (currentFilter == 'Status' && selectedStatus != null)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                'Estado: ${statusDescriptions[selectedStatus] ?? selectedStatus}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          
-          Expanded(
-            child: Scrollbar(
-              thumbVisibility: true,
-              child: isLoading
-                  ? ListView.builder(
-                      itemCount: 5,
-                      itemBuilder: (context, index) {
-                        return const MovementCardSkeleton();
-                      },
-                    )
-                  : filteredMovements.isEmpty
-                      ? const Center(
-                          child: Text('No hay movimientos para mostrar'),
-                        )
-                      : ListView.builder(
-                          itemCount: paginatedMovements.length,
-                          itemBuilder: (context, index) {
-                            final movement = paginatedMovements[index];
-                            return MovementCard(movement: movement);
-                          },
-                        ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  // Helper method to create filter chips
   Widget _buildFilterChip(String label) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),

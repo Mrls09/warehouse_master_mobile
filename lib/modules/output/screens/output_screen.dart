@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-
-
 import 'package:warehouse_master_mobile/kernel/shared/snackbar_alert.dart';
 import 'package:warehouse_master_mobile/kernel/utils/dio_client.dart';
 import 'package:warehouse_master_mobile/kernel/widgets/filter_chips.dart';
 import 'package:warehouse_master_mobile/kernel/widgets/movement_card.dart';
+import 'package:warehouse_master_mobile/kernel/widgets/movement_card_skeleton.dart';
 import 'package:warehouse_master_mobile/kernel/widgets/paginated_list.dart';
 import 'package:warehouse_master_mobile/models/movements/movement.dart';
 
@@ -20,10 +19,11 @@ class _OutputScreenState extends State<OutputScreen> {
   // Listas de movimientos
   List<Movement> allMovements = [];
   List<Movement> filteredMovements = [];
-  
+
   // Estado de carga
   bool isLoading = true;
-  
+  bool isLoadingMore = false;  // Indicador para más carga al hacer scroll
+
   // Filtros
   String currentFilter = FilterType.all.name;
   DateTime? selectedDate;
@@ -37,10 +37,13 @@ class _OutputScreenState extends State<OutputScreen> {
   // Filtros definidos
   late final List<GenericFilter<Movement>> _filters;
 
+  // Controlador de scroll
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
-    
+
     // Inicializar filtros
     _filters = [
       GenericFilter(label: 'Todos', type: FilterType.all),
@@ -50,9 +53,22 @@ class _OutputScreenState extends State<OutputScreen> {
     ];
 
     _fetchMovements();
+
+    // Detectar cuando el usuario llega al final de la lista para cargar más datos
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+        _loadMoreMovements();
+      }
+    });
   }
 
-  // Método para obtener movimientos
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  // Método para obtener movimientos de salida
   Future<void> _fetchMovements() async {
     try {
       Dio dio = DioClient(baseUrl: 'https://az3dtour.online:8443').dio;
@@ -62,13 +78,13 @@ class _OutputScreenState extends State<OutputScreen> {
         final List<dynamic> data = response.data['data'];
 
         // Filtrar solo movimientos de salida
-        final List<Movement> entryMovements = data
+        final List<Movement> outputMovements = data
             .map((item) => Movement.fromJson(item))
             .where((movement) => movement.status.contains('EXIT'))
             .toList();
 
         setState(() {
-          allMovements = entryMovements;
+          allMovements = outputMovements;
           filteredMovements = List.from(allMovements);
           isLoading = false;
         });
@@ -88,11 +104,34 @@ class _OutputScreenState extends State<OutputScreen> {
     }
   }
 
-  // Método para aplicar filtros
+  // Método para cargar más movimientos al hacer scroll
+  Future<void> _loadMoreMovements() async {
+    if (isLoadingMore || isLoading) return;  // Si ya estamos cargando, no hacer nada
+
+    setState(() {
+      isLoadingMore = true;  // Mostrar el loader de más datos
+    });
+
+    // Lógica para cargar más movimientos
+    await Future.delayed(const Duration(seconds: 2));  // Simular la carga de más datos
+
+    final newMovements = allMovements.sublist(
+      currentPage * itemsPerPage, 
+      (currentPage + 1) * itemsPerPage,
+    );
+    
+    setState(() {
+      filteredMovements.addAll(newMovements);  // Agregar nuevos datos
+      isLoadingMore = false;  // Detener el loader
+      currentPage++;  // Incrementar la página
+    });
+  }
+
+  // Método para aplicar los filtros
   void _applyFilter(String filterType) {
     setState(() {
       currentFilter = filterType;
-      currentPage = 1; // Reiniciar a la primera página
+      currentPage = 1; // Reiniciar la página
 
       switch (filterType) {
         case 'all':
@@ -127,7 +166,7 @@ class _OutputScreenState extends State<OutputScreen> {
     if (picked != null) {
       setState(() {
         selectedDate = picked;
-        currentPage = 1; // Reiniciar a la primera página
+        currentPage = 1; // Reiniciar la página
         filteredMovements = allMovements.where((movement) {
           final lastModified = DateTime.parse(movement.lastModified);
           return lastModified.year == picked.year &&
@@ -155,7 +194,7 @@ class _OutputScreenState extends State<OutputScreen> {
                   onTap: () {
                     setState(() {
                       selectedStatus = status;
-                      currentPage = 1; // Reiniciar a la primera página
+                      currentPage = 1; // Reiniciar la página
                       filteredMovements = allMovements.where((movement) {
                         return movement.status == status;
                       }).toList();
@@ -173,7 +212,6 @@ class _OutputScreenState extends State<OutputScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Calcular total de páginas
     final totalPages = (filteredMovements.length / itemsPerPage).ceil();
 
     return Scaffold(
@@ -192,7 +230,6 @@ class _OutputScreenState extends State<OutputScreen> {
                 selectedStatus: selectedStatus,
                 statusDescriptions: statusDescriptions,
               ),
-              
               // Control de paginación
               PaginationControl(
                 currentPage: currentPage,
@@ -209,15 +246,28 @@ class _OutputScreenState extends State<OutputScreen> {
           ),
         ),
       ),
-      body: PaginatedList<Movement>(
-        items: filteredMovements,
-        currentPage: currentPage,
-        itemsPerPage: itemsPerPage,
-        isLoading: isLoading,
-        itemBuilder: (movement) => MovementCard(movement: movement),
-        emptyWidget: const Center(
-          child: Text('No hay movimientos de entrada disponibles'),
-        ),
+      body: RefreshIndicator(
+        
+        onRefresh: _fetchMovements,
+        
+        child: isLoading
+            ? ListView.builder(
+                controller: _scrollController,
+                itemCount: 5,
+                itemBuilder: (context, index) {
+                  return const MovementCardSkeleton();
+                },
+              )
+            : PaginatedList<Movement>(
+                items: filteredMovements,
+                currentPage: currentPage,
+                itemsPerPage: itemsPerPage,
+                isLoading: isLoading,
+                itemBuilder: (movement) => MovementCard(movement: movement),
+                emptyWidget: const Center(
+                  child: Text('No hay movimientos de salida disponibles'),
+                ),
+              ),
       ),
     );
   }

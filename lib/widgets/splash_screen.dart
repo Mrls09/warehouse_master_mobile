@@ -1,8 +1,9 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:warehouse_master_mobile/kernel/utils/dio_client.dart';
 import 'package:warehouse_master_mobile/modules/auth/auth_service.dart';
+import 'package:warehouse_master_mobile/modules/auth/login_screen.dart';
+import 'package:warehouse_master_mobile/navigation/app_bar_navigation.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -12,7 +13,8 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  @override
+  bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
@@ -21,18 +23,43 @@ class _SplashScreenState extends State<SplashScreen> {
 
   // Verificar si el usuario está autenticado
   Future<void> _checkAuthentication() async {
-    final authService = AuthService(dio: DioClient(baseUrl: 'http://129.213.69.201:8081').dio);
-    final isAuthenticated = await authService.isAuthenticated();
+    try {
+      final authService = AuthService(dio: DioClient(baseUrl: 'http://129.213.69.201:8081').dio);
+      final isAuthenticated = await authService.isAuthenticated();
 
-    Future.delayed(const Duration(seconds: 3), () {
-      if (isAuthenticated) {
-        // Si está autenticado, redirige al NavScreen
-        Navigator.pushReplacementNamed(context, '/nav');
-      } else {
-        // Si no está autenticado, redirige al LoginScreen
-        Navigator.pushReplacementNamed(context, '/login');
-      }
-    });
+      // Usar Future.delayed para dar tiempo a la animación del splash
+      Future.delayed(const Duration(seconds: 1), () {
+        setState(() {
+          _isLoading = false;
+        });
+
+        // Si está autenticado, redirige a la pantalla principal (Home)
+        if (isAuthenticated) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const AppBarNavigation()), // Reemplaza con tu pantalla principal
+            (Route<dynamic> route) => false, // Elimina todas las pantallas anteriores
+          );
+        } else {
+          // Si no está autenticado, redirige a la pantalla de login
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()), // Reemplaza con tu pantalla de login
+            (Route<dynamic> route) => false, // Elimina todas las pantallas anteriores
+          );
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      // Si hay un error, redirigir al login
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        (Route<dynamic> route) => false,
+      );
+    }
   }
 
   @override
@@ -47,21 +74,23 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
           ),
           Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset('assets/logo.png', width: 200, height: 200),
-                const SizedBox(height: 12),
-                const Text(
-                  'WareHouse',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+            child: _isLoading
+                ? const CircularProgressIndicator()  // Indicador de carga mientras verificamos la autenticación
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset('assets/logo.png', width: 200, height: 200),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'WareHouse',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
           ),
         ],
       ),

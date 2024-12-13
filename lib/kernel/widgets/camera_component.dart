@@ -6,9 +6,10 @@ import 'dart:convert';
 import 'package:warehouse_master_mobile/styles/theme/app_theme.dart';
 
 class ImagePickerComponent extends StatefulWidget {
-  const ImagePickerComponent({Key? key}) : super(key: key);
+  const ImagePickerComponent({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _ImagePickerComponentState createState() => _ImagePickerComponentState();
 }
 
@@ -24,6 +25,7 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
     debugPrint('Imagen en Base64: $base64Image');
     return base64Image; // Devolvemos la cadena Base64
   } catch (e) {
+    // ignore: use_build_context_synchronously
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -51,6 +53,7 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
         await _convertImageToBase64(imageFile);
       }
     } catch (e) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -102,6 +105,7 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
  void _onAccept() {
   if (_selectedImage != null) {
     _convertImageToBase64(_selectedImage!).then((base64Image) {
+      // ignore: use_build_context_synchronously
       Navigator.of(context).pop(base64Image);
     });
   }

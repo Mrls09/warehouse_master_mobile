@@ -23,13 +23,6 @@ class _AppBarNavigationState extends State<AppBarNavigation> {
 
   ];
 
-  final List<String> _titles = [
-    'Inicio',
-    'Entradas',
-    'Salidas',
-    'Perfil',
-
-  ];
 
   void _onItemTapped(int index) {
     setState(() {

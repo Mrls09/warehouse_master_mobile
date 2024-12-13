@@ -37,7 +37,7 @@ class AuthService {
   
           return true; // Inicio de sesión exitoso
         } else {
-          print('Respuesta inesperada: ${response.data}');
+         
           return false;
         }
       } else {

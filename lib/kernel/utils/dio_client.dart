@@ -1,6 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:warehouse_master_mobile/kernel/shared/snackbar_alert.dart';
 
 class DioClient {
   final Dio _dio;
@@ -19,14 +20,13 @@ class DioClient {
           // Recupera el token del almacenamiento seguro
           //final token = await _secureStorage.read(key: 'authToken');
           final prefs = await SharedPreferences.getInstance();
-          final token = await prefs.getString('auth_token');
-          print('en requeeeeest');
-          print(token);
+          final token = prefs.getString('auth_token');
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token'; // Agregar token a las cabeceras
           }
         } catch (e) {
           print('Error reading token: $e');
+        
         }
         handler.next(options);
       },

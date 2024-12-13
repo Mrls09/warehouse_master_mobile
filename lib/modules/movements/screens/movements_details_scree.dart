@@ -21,6 +21,7 @@ class MovementDetailsScreen extends StatefulWidget {
 
 class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
   String? _base64Image;
+  bool isLoading = false;
 
   String getStatusDescription(String status) {
     return statusDescriptions[status] ?? 'Estado desconocido';
@@ -42,6 +43,10 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
   }
 
   Future<void> _updateTransferStatus() async {
+    setState(() {
+      isLoading = true;
+    });
+
     final prefs = await SharedPreferences.getInstance();
     final String? authToken = prefs.getString('auth_token');
 
@@ -68,6 +73,27 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
           ),
         ],
       );
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+
+    // Validación: asegurarse de que la imagen está seleccionada
+    if (_base64Image == null || _base64Image!.isEmpty) {
+      CustomDialogAlert(context).show(
+        title: 'Imagen requerida',
+        content: const Text('Por favor, seleccione una imagen antes de continuar.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cerrar'),
+          ),
+        ],
+      );
+      setState(() {
+        isLoading = false;
+      });
       return;
     }
 
@@ -87,8 +113,6 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
           backgroundColor: Colors.green,
         );
       } else {
-        print(
-            "Error en la petición: ${response.statusCode} - ${response.data}");
         SnackbarAlert(context).show(
           message: 'Error en la solicitud',
           backgroundColor: Colors.red,
@@ -96,14 +120,16 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
       }
     } catch (e) {
       if (e is DioException) {
-        print('Dio Error Response: ${e.response?.data}');
-        print('Dio Error Status Code: ${e.response?.statusCode}');
+        SnackbarAlert(context).show(message: 'Dio Error Response: ${e.response?.data}');
       }
-      print("Error en la solicitud: $e");
       SnackbarAlert(context).show(
         message: 'Error en la solicitud',
         backgroundColor: Colors.red,
       );
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -137,7 +163,8 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
   Widget build(BuildContext context) {
     final transfer = widget.movement;
     final isPendingEntry = transfer.status == 'PENDING_ENTRY';
-    final isEntry = transfer.status == 'ENTRY'; // Estado ENTRY
+    final isEntry = transfer.status == 'ENTRY';
+    final isDeparture = transfer.status == 'EXIT';
 
     return Scaffold(
       appBar: AppBar(
@@ -187,14 +214,29 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
                   ),
                 ),
               ),
+            if (isDeparture)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16.0),
+                child: Text(
+                  'Este movimiento ya ha sido retirado del almacén.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.orange,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                
+              ),
+            
+            
           ],
         ),
       ),
-      bottomNavigationBar: !isPendingEntry && !isEntry
+      bottomNavigationBar: !isPendingEntry && !isEntry && !isDeparture
           ? _buildBottomButton(items)
-          : null, // No se muestra en ENTRY
+          : null,
       floatingActionButton:
-          !isPendingEntry && !isEntry // No se muestra en ENTRY
+          !isPendingEntry && !isEntry && !isDeparture
               ? FloatingActionButton(
                   onPressed: () async {
                     final base64Image = await Navigator.push(
@@ -446,18 +488,24 @@ class _MovementDetailsScreenState extends State<MovementDetailsScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
       child: ElevatedButton(
-        onPressed: _updateTransferStatus,
+        onPressed: isLoading || !allTrue
+            ? null  // Deshabilitar el botón mientras está cargando
+            : _updateTransferStatus, // Ejecutar la petición si no está cargando
         style: ElevatedButton.styleFrom(
-          backgroundColor: allTrue ? AppColors.deepMaroon : Colors.grey,
+          backgroundColor: allTrue ? AppColors.rosePrimary : Colors.grey,
           minimumSize: const Size(double.infinity, 50),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(25.0),
           ),
         ),
-        child: Text(
-          buttonText,
-          style: const TextStyle(fontSize: 16, color: Colors.white),
-        ),
+        child: isLoading
+            ? const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ) // Mostrar el loader cuando está cargando
+            : Text(
+                buttonText,
+                style: const TextStyle(fontSize: 16, color: Colors.white),
+              ),
       ),
     );
   }
